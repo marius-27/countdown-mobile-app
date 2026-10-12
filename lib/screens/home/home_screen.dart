@@ -42,6 +42,11 @@ class _HomeScreenState extends State<HomeScreen> {
     await _loadEvents();
   }
 
+  Future<void> _openCountdown(CountdownEvent event) async {
+    await Navigator.pushNamed(context, AppRoutes.countdown, arguments: event);
+    await _loadEvents();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,7 +81,11 @@ class _HomeScreenState extends State<HomeScreen> {
       itemCount: _events.length,
       separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
-        return CountdownEventCard(event: _events[index]);
+        final event = _events[index];
+        return CountdownEventCard(
+          event: event,
+          onTap: () => _openCountdown(event),
+        );
       },
     );
   }

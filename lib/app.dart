@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'core/constants/app_routes.dart';
 import 'core/theme/app_theme.dart';
+import 'models/countdown_event.dart';
 import 'repositories/event_repository.dart';
 import 'screens/archive/archive_screen.dart';
 import 'screens/countdown/countdown_screen.dart';
@@ -25,7 +26,9 @@ class CountdownApp extends StatelessWidget {
       routes: {
         AppRoutes.home: (_) => HomeScreen(repository: repository),
         AppRoutes.createEvent: (_) => CreateEventScreen(repository: repository),
-        AppRoutes.countdown: (_) => const CountdownScreen(),
+        AppRoutes.countdown: (context) => CountdownScreen(
+          event: ModalRoute.of(context)!.settings.arguments as CountdownEvent,
+        ),
         AppRoutes.archive: (_) => const ArchiveScreen(),
       },
     );
