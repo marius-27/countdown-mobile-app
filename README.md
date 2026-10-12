@@ -1,17 +1,38 @@
-# countdown_mobile_app
+# Countdown App
 
-A new Flutter project.
+A cross-platform mobile countdown application built with **React Native**.  
+The app allows users to create countdown events, choose a target date and time, and see exactly how much time remains until each event.
 
-## Getting Started
+This project is designed to practice working with user input, navigation between screens, persistent local data, scheduled notifications, and reusable UI components.
 
-This project is a starting point for a Flutter application.
+## Features
 
-A few resources to get you started if this is your first Flutter project:
+### Core Features
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+- Create a countdown event with a custom name
+- Select a target date and time
+- View all active countdown events
+- Open an event to see its countdown
+- Display the remaining days and hours
+- Automatically update countdown values
+- Store events locally so they remain available after restarting the app
+- Delete countdown events
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### Planned / Extra Features
+
+- Archive completed events
+- Schedule reminder notifications before an event
+- Choose how many days before the event a reminder should be sent
+- Customize events with colors and emojis
+- Add custom background images
+- Edit existing countdown events
+- Add an iOS or Android home-screen widget
+
+## Example
+
+A user could create an event such as:
+
+```text
+Event: My Wedding
+Date: June 24, 2027
+Time: 18:00
