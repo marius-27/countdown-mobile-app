@@ -1,0 +1,19 @@
+abstract final class CountdownCalculator {
+  /// Calendar days from [now] until [targetDate], ignoring the time of day.
+  ///
+  /// Dates are compared in UTC so daylight saving changes don't shift the
+  /// result by a day.
+  static int remainingDays(DateTime targetDate, {DateTime? now}) {
+    final from = now ?? DateTime.now();
+    final start = DateTime.utc(from.year, from.month, from.day);
+    final end = DateTime.utc(targetDate.year, targetDate.month, targetDate.day);
+    return end.difference(start).inDays;
+  }
+
+  static String remainingDaysLabel(DateTime targetDate, {DateTime? now}) {
+    final days = remainingDays(targetDate, now: now);
+    if (days <= 0) return 'Today';
+    if (days == 1) return '1 day remaining';
+    return '$days days remaining';
+  }
+}

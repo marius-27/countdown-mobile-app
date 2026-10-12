@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/utils/countdown_calculator.dart';
 import '../core/utils/date_formatters.dart';
 import '../models/countdown_event.dart';
 
@@ -39,6 +40,13 @@ class CountdownEventCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
+                    Text(
+                      CountdownCalculator.remainingDaysLabel(event.targetDate),
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
                     Text(
                       DateFormatters.shortDate(event.targetDate),
                       style: textTheme.bodySmall,
