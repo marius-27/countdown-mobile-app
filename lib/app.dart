@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'core/theme/app_theme.dart';
+
 class CountdownApp extends StatelessWidget {
   const CountdownApp({super.key});
 
@@ -8,9 +10,9 @@ class CountdownApp extends StatelessWidget {
     return MaterialApp(
       title: 'Countdown',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
-      ),
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.system,
       home: const Scaffold(
         body: Center(child: Text('Countdown')),
       ),
