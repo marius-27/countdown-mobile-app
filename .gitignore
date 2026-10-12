@@ -46,3 +46,5 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+/countdown_flutter_branches_commits.txt
