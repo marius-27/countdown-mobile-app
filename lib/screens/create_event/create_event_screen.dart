@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../core/utils/event_validators.dart';
+import '../../models/countdown_event.dart';
+import '../../repositories/event_repository.dart';
 
 class CreateEventScreen extends StatefulWidget {
-  const CreateEventScreen({super.key});
+  const CreateEventScreen({super.key, required this.repository});
+
+  final EventRepository repository;
 
   @override
   State<CreateEventScreen> createState() => _CreateEventScreenState();
@@ -17,6 +21,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
   DateTime? _date;
   TimeOfDay _time = const TimeOfDay(hour: 12, minute: 0);
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -66,8 +71,22 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     return DateTime(date.year, date.month, date.day, _time.hour, _time.minute);
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+
+    final now = DateTime.now();
+    final event = CountdownEvent(
+      id: now.microsecondsSinceEpoch.toString(),
+      title: _titleController.text.trim(),
+      targetDate: _targetDate!,
+      createdAt: now,
+    );
+
+    setState(() => _isSaving = true);
+    await widget.repository.saveEvent(event);
+    if (!mounted) return;
+
+    Navigator.pop(context, event);
   }
 
   @override
@@ -112,7 +131,10 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
               onTap: _pickTime,
             ),
             const SizedBox(height: 32),
-            FilledButton(onPressed: _submit, child: const Text('CREATE')),
+            FilledButton(
+              onPressed: _isSaving ? null : _submit,
+              child: const Text('CREATE'),
+            ),
           ],
         ),
       ),
