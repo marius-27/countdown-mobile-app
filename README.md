@@ -41,3 +41,24 @@ This project is designed to practice working with user input, navigation between
 flutter pub get
 flutter run
 ```
+
+## Project Structure
+
+```text
+lib/
+├── main.dart              # Entry point
+├── app.dart               # MaterialApp, theme and routes
+├── core/
+│   ├── constants/         # Route names and app-wide constants
+│   ├── theme/             # Light and dark themes
+│   └── utils/             # Helper functions
+├── models/                # Data models (e.g. CountdownEvent)
+├── repositories/          # Local data persistence
+├── services/              # Notifications and other platform services
+├── screens/
+│   ├── home/              # Active countdown list
+│   ├── create_event/      # New countdown form
+│   ├── countdown/         # Countdown details
+│   └── archive/           # Past events
+└── widgets/               # Reusable UI components
+```
