@@ -23,7 +23,7 @@ class CountdownApp extends StatelessWidget {
       themeMode: ThemeMode.system,
       initialRoute: AppRoutes.home,
       routes: {
-        AppRoutes.home: (_) => const HomeScreen(),
+        AppRoutes.home: (_) => HomeScreen(repository: repository),
         AppRoutes.createEvent: (_) => CreateEventScreen(repository: repository),
         AppRoutes.countdown: (_) => const CountdownScreen(),
         AppRoutes.archive: (_) => const ArchiveScreen(),
