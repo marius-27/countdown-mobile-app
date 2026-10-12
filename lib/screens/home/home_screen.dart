@@ -4,6 +4,7 @@ import '../../core/constants/app_routes.dart';
 import '../../models/countdown_event.dart';
 import '../../repositories/event_repository.dart';
 import '../../widgets/countdown_event_card.dart';
+import '../../widgets/empty_countdown_state.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.repository});
@@ -68,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return const Center(child: CircularProgressIndicator());
     }
     if (_events.isEmpty) {
-      return const Center(child: Text('No countdowns yet'));
+      return const EmptyCountdownState();
     }
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
