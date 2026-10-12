@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/utils/event_validators.dart';
+
 class CreateEventScreen extends StatefulWidget {
   const CreateEventScreen({super.key});
 
@@ -58,7 +60,15 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     });
   }
 
-  void _submit() {}
+  DateTime? get _targetDate {
+    final date = _date;
+    if (date == null) return null;
+    return DateTime(date.year, date.month, date.day, _time.hour, _time.minute);
+  }
+
+  void _submit() {
+    if (!_formKey.currentState!.validate()) return;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +87,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
               ),
               textCapitalization: TextCapitalization.sentences,
               textInputAction: TextInputAction.done,
+              validator: EventValidators.title,
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -88,6 +99,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
               ),
               readOnly: true,
               onTap: _pickDate,
+              validator: (_) => EventValidators.targetDate(_targetDate),
             ),
             const SizedBox(height: 16),
             TextFormField(
