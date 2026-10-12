@@ -11,13 +11,22 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _dateController = TextEditingController();
+  final _timeController = TextEditingController();
 
   DateTime? _date;
+  TimeOfDay _time = const TimeOfDay(hour: 12, minute: 0);
+
+  @override
+  void initState() {
+    super.initState();
+    _timeController.text = _formatTime(_time);
+  }
 
   @override
   void dispose() {
     _titleController.dispose();
     _dateController.dispose();
+    _timeController.dispose();
     super.dispose();
   }
 
@@ -36,6 +45,16 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     setState(() {
       _date = picked;
       _dateController.text = _formatDate(picked);
+    });
+  }
+
+  Future<void> _pickTime() async {
+    final picked = await showTimePicker(context: context, initialTime: _time);
+    if (picked == null) return;
+
+    setState(() {
+      _time = picked;
+      _timeController.text = _formatTime(picked);
     });
   }
 
@@ -70,6 +89,16 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
               readOnly: true,
               onTap: _pickDate,
             ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _timeController,
+              decoration: const InputDecoration(
+                labelText: 'Time',
+                suffixIcon: Icon(Icons.schedule_outlined),
+              ),
+              readOnly: true,
+              onTap: _pickTime,
+            ),
             const SizedBox(height: 32),
             FilledButton(onPressed: _submit, child: const Text('CREATE')),
           ],
@@ -83,3 +112,6 @@ String _twoDigits(int value) => value.toString().padLeft(2, '0');
 
 String _formatDate(DateTime date) =>
     '${_twoDigits(date.day)} / ${_twoDigits(date.month)} / ${date.year}';
+
+String _formatTime(TimeOfDay time) =>
+    '${_twoDigits(time.hour)}:${_twoDigits(time.minute)}';
