@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_routes.dart';
 import '../../models/countdown_event.dart';
 import '../../repositories/event_repository.dart';
+import '../../widgets/countdown_event_card.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.repository});
@@ -68,12 +69,12 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_events.isEmpty) {
       return const Center(child: Text('No countdowns yet'));
     }
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
       itemCount: _events.length,
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
-        final event = _events[index];
-        return ListTile(title: Text(event.title));
+        return CountdownEventCard(event: _events[index]);
       },
     );
   }
