@@ -2,4 +2,5 @@
 <resources>
     <string name="countdown_widget_description">Shows your next countdown</string>
     <string name="countdown_widget_empty">No upcoming events</string>
+    <string name="countdown_widget_empty_hint">Tap to add a countdown</string>
 </resources>

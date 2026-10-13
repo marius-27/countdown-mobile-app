@@ -31,17 +31,27 @@ class CountdownWidgetProvider : HomeWidgetProvider() {
                     R.id.widget_root,
                     HomeWidgetLaunchIntent.getActivity(context, MainActivity::class.java),
                 )
-                showNearestEvent(this, widgetData)
+                showNearestEvent(context, this, widgetData)
             }
             appWidgetManager.updateAppWidget(widgetId, views)
         }
     }
 
     // Keys must match HomeWidgetService in lib/services/home_widget_service.dart.
-    private fun showNearestEvent(views: RemoteViews, widgetData: SharedPreferences) {
-        val title = widgetData.getString("nearest_event_title", null) ?: return
+    private fun showNearestEvent(
+        context: Context,
+        views: RemoteViews,
+        widgetData: SharedPreferences,
+    ) {
+        val title = widgetData.getString("nearest_event_title", null)
         val targetMillis =
-            widgetData.getString("nearest_event_target_millis", null)?.toLongOrNull() ?: return
+            widgetData.getString("nearest_event_target_millis", null)?.toLongOrNull()
+        // The saved event can complete while the app is closed, so it is only
+        // shown while its target time is still ahead.
+        if (title == null || targetMillis == null || targetMillis <= System.currentTimeMillis()) {
+            showEmptyState(context, views)
+            return
+        }
         val emoji = widgetData.getString("nearest_event_emoji", null) ?: DEFAULT_EMOJI
 
         val targetDate = Instant.ofEpochMilli(targetMillis).atZone(ZoneId.systemDefault()).toLocalDate()
@@ -70,6 +80,14 @@ class CountdownWidgetProvider : HomeWidgetProvider() {
                 ColorStateList.valueOf(color.toInt()),
             )
         }
+    }
+
+    private fun showEmptyState(context: Context, views: RemoteViews) {
+        views.setTextViewText(R.id.widget_title, context.getString(R.string.countdown_widget_empty))
+        views.setViewVisibility(R.id.widget_days, View.GONE)
+        views.setViewVisibility(R.id.widget_days_label, View.GONE)
+        views.setTextViewText(R.id.widget_date, context.getString(R.string.countdown_widget_empty_hint))
+        views.setViewVisibility(R.id.widget_date, View.VISIBLE)
     }
 
     private companion object {
