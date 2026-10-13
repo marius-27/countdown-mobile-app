@@ -6,8 +6,10 @@ import '../../core/utils/event_validators.dart';
 import '../../models/countdown_event.dart';
 import '../../repositories/event_repository.dart';
 import '../../services/background_image_service.dart';
+import '../../services/notification_service.dart';
 import '../../widgets/color_selector.dart';
 import '../../widgets/emoji_selector.dart';
+import '../../widgets/reminder_settings.dart';
 
 class CreateEventScreen extends StatefulWidget {
   const CreateEventScreen({super.key, required this.repository, this.event});
@@ -33,6 +35,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   String? _emoji;
   int? _colorValue;
   String? _backgroundImagePath;
+  bool _notificationEnabled = false;
+  int _notificationDaysBefore = ReminderSettings.defaultDaysBefore;
+  TimeOfDay _notificationTime = ReminderSettings.defaultTime;
   bool _isSaving = false;
 
   bool get _isEditing => widget.event != null;
@@ -51,6 +56,16 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       _emoji = event.emoji;
       _colorValue = event.colorValue;
       _backgroundImagePath = event.backgroundImagePath;
+      _notificationEnabled = event.notificationEnabled;
+      _notificationDaysBefore =
+          event.notificationDaysBefore ?? _notificationDaysBefore;
+      final minutes = event.notificationTimeMinutes;
+      if (minutes != null) {
+        _notificationTime = TimeOfDay(
+          hour: minutes ~/ 60,
+          minute: minutes % 60,
+        );
+      }
     }
     _timeController.text = _formatTime(_time);
   }
@@ -100,6 +115,33 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     setState(() => _backgroundImagePath = path);
   }
 
+  Future<void> _setNotificationEnabled(bool enabled) async {
+    if (enabled) {
+      final allowed = await NotificationService.instance.requestPermission();
+      if (!mounted) return;
+      if (!allowed) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Allow notifications in settings to get reminders.'),
+          ),
+        );
+        return;
+      }
+    }
+
+    setState(() => _notificationEnabled = enabled);
+  }
+
+  Future<void> _pickNotificationTime() async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: _notificationTime,
+    );
+    if (picked == null) return;
+
+    setState(() => _notificationTime = picked);
+  }
+
   DateTime? get _targetDate {
     final date = _date;
     if (date == null) return null;
@@ -124,8 +166,10 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       emoji: _emoji,
       colorValue: _colorValue,
       backgroundImagePath: _backgroundImagePath,
-      notificationEnabled: existing?.notificationEnabled ?? false,
-      notificationDaysBefore: existing?.notificationDaysBefore,
+      notificationEnabled: _notificationEnabled,
+      notificationDaysBefore: _notificationDaysBefore,
+      notificationTimeMinutes:
+          _notificationTime.hour * 60 + _notificationTime.minute,
     );
 
     setState(() => _isSaving = true);
@@ -235,6 +279,18 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                   ),
                 ],
               ],
+            ),
+            const SizedBox(height: 32),
+            Text('Remind me', style: textTheme.titleMedium),
+            const SizedBox(height: 8),
+            ReminderSettings(
+              enabled: _notificationEnabled,
+              daysBefore: _notificationDaysBefore,
+              timeLabel: _formatTime(_notificationTime),
+              onEnabledChanged: _setNotificationEnabled,
+              onDaysBeforeChanged: (days) =>
+                  setState(() => _notificationDaysBefore = days),
+              onTimeTap: _pickNotificationTime,
             ),
             const SizedBox(height: 32),
             FilledButton(

@@ -9,6 +9,7 @@ class CountdownEvent {
     this.backgroundImagePath,
     this.notificationEnabled = false,
     this.notificationDaysBefore,
+    this.notificationTimeMinutes,
   });
 
   final String id;
@@ -21,6 +22,9 @@ class CountdownEvent {
 
   final bool notificationEnabled;
   final int? notificationDaysBefore;
+
+  /// Time of day for the reminder, in minutes after midnight.
+  final int? notificationTimeMinutes;
 
   final DateTime createdAt;
 
@@ -40,6 +44,7 @@ class CountdownEvent {
       backgroundImagePath: json['backgroundImagePath'] as String?,
       notificationEnabled: json['notificationEnabled'] as bool? ?? false,
       notificationDaysBefore: json['notificationDaysBefore'] as int?,
+      notificationTimeMinutes: json['notificationTimeMinutes'] as int?,
     );
   }
 
@@ -54,6 +59,7 @@ class CountdownEvent {
       'backgroundImagePath': backgroundImagePath,
       'notificationEnabled': notificationEnabled,
       'notificationDaysBefore': notificationDaysBefore,
+      'notificationTimeMinutes': notificationTimeMinutes,
     };
   }
 
@@ -65,6 +71,7 @@ class CountdownEvent {
     String? backgroundImagePath,
     bool? notificationEnabled,
     int? notificationDaysBefore,
+    int? notificationTimeMinutes,
   }) {
     return CountdownEvent(
       id: id,
@@ -77,6 +84,8 @@ class CountdownEvent {
       notificationEnabled: notificationEnabled ?? this.notificationEnabled,
       notificationDaysBefore:
           notificationDaysBefore ?? this.notificationDaysBefore,
+      notificationTimeMinutes:
+          notificationTimeMinutes ?? this.notificationTimeMinutes,
     );
   }
 }
