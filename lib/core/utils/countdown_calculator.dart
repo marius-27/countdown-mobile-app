@@ -10,6 +10,15 @@ abstract final class CountdownCalculator {
     return end.difference(start).inDays;
   }
 
+  /// Exact time left from [now] until [targetDate], never negative.
+  ///
+  /// Always recalculated from the clock instead of decremented, so the result
+  /// stays correct after the app has been in the background.
+  static Duration remainingDuration(DateTime targetDate, {DateTime? now}) {
+    final remaining = targetDate.difference(now ?? DateTime.now());
+    return remaining.isNegative ? Duration.zero : remaining;
+  }
+
   static String remainingDaysLabel(DateTime targetDate, {DateTime? now}) {
     final days = remainingDays(targetDate, now: now);
     if (days <= 0) return 'Today';

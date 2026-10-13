@@ -14,7 +14,9 @@ class CountdownScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
-    final days = CountdownCalculator.remainingDays(event.targetDate);
+    final days = CountdownCalculator.remainingDuration(
+      event.targetDate,
+    ).inDays;
 
     return Scaffold(
       appBar: AppBar(),
