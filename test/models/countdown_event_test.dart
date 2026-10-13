@@ -66,5 +66,32 @@ void main() {
       expect(updated.createdAt, fullEvent.createdAt);
       expect(updated.emoji, fullEvent.emoji);
     });
+
+    group('isCompleted', () {
+      final now = DateTime(2026, 10, 13, 12);
+
+      CountdownEvent eventAt(DateTime targetDate) => CountdownEvent(
+        id: '3',
+        title: 'Exam',
+        targetDate: targetDate,
+        createdAt: DateTime(2026, 10, 1),
+      );
+
+      test('is false when the target date is tomorrow', () {
+        final event = eventAt(now.add(const Duration(days: 1)));
+
+        expect(event.isCompleted(now: now), isFalse);
+      });
+
+      test('is true when the target date is now', () {
+        expect(eventAt(now).isCompleted(now: now), isTrue);
+      });
+
+      test('is true when the target date was yesterday', () {
+        final event = eventAt(now.subtract(const Duration(days: 1)));
+
+        expect(event.isCompleted(now: now), isTrue);
+      });
+    });
   });
 }

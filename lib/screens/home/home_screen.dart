@@ -31,7 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!mounted) return;
 
     setState(() {
-      _events = events.where((e) => e.targetDate.isAfter(now)).toList()
+      _events = events.where((e) => !e.isCompleted(now: now)).toList()
         ..sort((a, b) => a.targetDate.compareTo(b.targetDate));
       _isLoading = false;
     });

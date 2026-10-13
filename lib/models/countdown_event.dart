@@ -24,6 +24,11 @@ class CountdownEvent {
 
   final DateTime createdAt;
 
+  /// Whether the target date has been reached, meaning the event belongs in
+  /// Past events. [now] can be passed to make the check deterministic in tests.
+  bool isCompleted({DateTime? now}) =>
+      !targetDate.isAfter(now ?? DateTime.now());
+
   factory CountdownEvent.fromJson(Map<String, dynamic> json) {
     return CountdownEvent(
       id: json['id'] as String,
