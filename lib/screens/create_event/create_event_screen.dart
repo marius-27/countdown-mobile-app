@@ -101,14 +101,19 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     final existing = widget.event;
 
     // Editing keeps the id, so the repository replaces the stored event.
-    final event =
-        existing?.copyWith(title: title, targetDate: targetDate) ??
-        CountdownEvent(
-          id: DateTime.now().microsecondsSinceEpoch.toString(),
-          title: title,
-          targetDate: targetDate,
-          createdAt: DateTime.now(),
-        );
+    // The event is rebuilt rather than copied so a cleared emoji or color is
+    // stored as null instead of falling back to the previous value.
+    final event = CountdownEvent(
+      id: existing?.id ?? DateTime.now().microsecondsSinceEpoch.toString(),
+      title: title,
+      targetDate: targetDate,
+      createdAt: existing?.createdAt ?? DateTime.now(),
+      emoji: _emoji,
+      colorValue: _colorValue,
+      backgroundImagePath: existing?.backgroundImagePath,
+      notificationEnabled: existing?.notificationEnabled ?? false,
+      notificationDaysBefore: existing?.notificationDaysBefore,
+    );
 
     setState(() => _isSaving = true);
     await widget.repository.saveEvent(event);
