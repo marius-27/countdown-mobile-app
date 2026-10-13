@@ -295,18 +295,21 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                   ],
                 ],
               ),
-              const SizedBox(height: 32),
-              Text('Remind me', style: textTheme.titleMedium),
-              const SizedBox(height: 8),
-              ReminderSettings(
-                enabled: _notificationEnabled,
-                daysBefore: _notificationDaysBefore,
-                timeLabel: _formatTime(_notificationTime),
-                onEnabledChanged: _setNotificationEnabled,
-                onDaysBeforeChanged: (days) =>
-                    setState(() => _notificationDaysBefore = days),
-                onTimeTap: _pickNotificationTime,
-              ),
+              // Reminders can only be scheduled on Android and iOS.
+              if (NotificationService.isSupported) ...[
+                const SizedBox(height: 32),
+                Text('Remind me', style: textTheme.titleMedium),
+                const SizedBox(height: 8),
+                ReminderSettings(
+                  enabled: _notificationEnabled,
+                  daysBefore: _notificationDaysBefore,
+                  timeLabel: _formatTime(_notificationTime),
+                  onEnabledChanged: _setNotificationEnabled,
+                  onDaysBeforeChanged: (days) =>
+                      setState(() => _notificationDaysBefore = days),
+                  onTimeTap: _pickNotificationTime,
+                ),
+              ],
               const SizedBox(height: 32),
               FilledButton(
                 onPressed: _isSaving ? null : _submit,

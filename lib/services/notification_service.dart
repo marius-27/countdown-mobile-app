@@ -33,8 +33,17 @@ class NotificationService {
     iOS: DarwinNotificationDetails(),
   );
 
+  /// Reminders are only scheduled on Android and iOS; the plugin can't
+  /// schedule notifications on desktop or web.
+  static bool get isSupported =>
+      !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS);
+
+  /// Does nothing on unsupported platforms, which also makes the other
+  /// methods no-ops there.
   Future<void> initialize() async {
-    if (_initialized) return;
+    if (_initialized || !isSupported) return;
 
     // Scheduled notifications need the device's time zone so reminders fire
     // at the chosen local time.
@@ -62,6 +71,7 @@ class NotificationService {
   /// Schedules the event's reminder, if it has one enabled and its time is
   /// still in the future.
   Future<void> scheduleEventReminder(CountdownEvent event) async {
+    if (!_initialized) return;
     final reminderAt = reminderDate(event);
     final now = tz.TZDateTime.now(tz.local);
     if (reminderAt == null || !reminderAt.isAfter(now)) return;
@@ -81,8 +91,10 @@ class NotificationService {
   }
 
   /// Removes the event's pending reminder, if any.
-  Future<void> cancelEventReminder(String eventId) =>
-      _plugin.cancel(notificationId(eventId));
+  Future<void> cancelEventReminder(String eventId) async {
+    if (!_initialized) return;
+    await _plugin.cancel(notificationId(eventId));
+  }
 
   /// When the reminder for [event] should fire, or null if it has none.
   static tz.TZDateTime? reminderDate(CountdownEvent event) {
