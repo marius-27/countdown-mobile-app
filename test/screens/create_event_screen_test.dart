@@ -14,18 +14,19 @@ void main() {
   });
 
   Future<void> pumpScreen(WidgetTester tester) {
-    // A tall screen keeps the whole form built, so every field is validated.
-    tester.view.physicalSize = const Size(800, 2400);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-
     return tester.pumpWidget(
       MaterialApp(home: CreateEventScreen(repository: repository)),
     );
   }
 
   Future<void> tapCreate(WidgetTester tester) async {
-    await tester.tap(find.text('CREATE'));
+    // The button sits below the customization options, out of view on the
+    // default 800x600 test screen. Scrolling to it moves the title and date
+    // fields out of view, so this also checks they are still validated.
+    final create = find.text('CREATE');
+    await tester.ensureVisible(create);
+    await tester.pumpAndSettle();
+    await tester.tap(create);
     await tester.pump();
   }
 
@@ -42,6 +43,10 @@ void main() {
     await pumpScreen(tester);
 
     await tester.enterText(find.byType(TextFormField).first, 'Birthday');
+    // Close the keyboard like a user would; a focused field keeps scrolling
+    // itself back into view, which would hide the CREATE button again.
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
     await tapCreate(tester);
 
     expect(find.text('Please enter a title.'), findsNothing);

@@ -196,115 +196,121 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       ),
       body: Form(
         key: _formKey,
-        child: ListView(
+        // A Column keeps every field built while scrolled out of view; a
+        // lazy ListView disposes them, and the Form then skips validating
+        // them, letting an event without a date through.
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
-          children: [
-            TextFormField(
-              controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'Title',
-                hintText: 'My Birthday',
-              ),
-              textCapitalization: TextCapitalization.sentences,
-              textInputAction: TextInputAction.done,
-              validator: EventValidators.title,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _dateController,
-              decoration: const InputDecoration(
-                labelText: 'Date',
-                hintText: 'DD / MM / YYYY',
-                suffixIcon: Icon(Icons.calendar_today_outlined),
-              ),
-              readOnly: true,
-              onTap: _pickDate,
-              validator: (_) => EventValidators.targetDate(_targetDate),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _timeController,
-              decoration: const InputDecoration(
-                labelText: 'Time',
-                suffixIcon: Icon(Icons.schedule_outlined),
-              ),
-              readOnly: true,
-              onTap: _pickTime,
-            ),
-            const SizedBox(height: 32),
-            Text('Customize event', style: textTheme.titleMedium),
-            const SizedBox(height: 16),
-            Text('Emoji', style: textTheme.labelLarge),
-            const SizedBox(height: 8),
-            EmojiSelector(
-              selected: _emoji,
-              onSelected: (emoji) => setState(() => _emoji = emoji),
-            ),
-            const SizedBox(height: 16),
-            Text('Color', style: textTheme.labelLarge),
-            const SizedBox(height: 8),
-            ColorSelector(
-              selected: _colorValue,
-              onSelected: (value) => setState(() => _colorValue = value),
-            ),
-            const SizedBox(height: 16),
-            Text('Background', style: textTheme.labelLarge),
-            const SizedBox(height: 8),
-            if (_backgroundImagePath != null) ...[
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.file(
-                  File(_backgroundImagePath!),
-                  height: 140,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => const SizedBox(
-                    height: 140,
-                    child: Center(child: Icon(Icons.broken_image_outlined)),
-                  ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextFormField(
+                controller: _titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Title',
+                  hintText: 'My Birthday',
                 ),
+                textCapitalization: TextCapitalization.sentences,
+                textInputAction: TextInputAction.done,
+                validator: EventValidators.title,
               ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _dateController,
+                decoration: const InputDecoration(
+                  labelText: 'Date',
+                  hintText: 'DD / MM / YYYY',
+                  suffixIcon: Icon(Icons.calendar_today_outlined),
+                ),
+                readOnly: true,
+                onTap: _pickDate,
+                validator: (_) => EventValidators.targetDate(_targetDate),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _timeController,
+                decoration: const InputDecoration(
+                  labelText: 'Time',
+                  suffixIcon: Icon(Icons.schedule_outlined),
+                ),
+                readOnly: true,
+                onTap: _pickTime,
+              ),
+              const SizedBox(height: 32),
+              Text('Customize event', style: textTheme.titleMedium),
+              const SizedBox(height: 16),
+              Text('Emoji', style: textTheme.labelLarge),
               const SizedBox(height: 8),
-            ],
-            Row(
-              children: [
-                OutlinedButton.icon(
-                  onPressed: _pickBackgroundImage,
-                  icon: const Icon(Icons.image_outlined),
-                  label: Text(
-                    _backgroundImagePath == null
-                        ? 'Choose image'
-                        : 'Change image',
+              EmojiSelector(
+                selected: _emoji,
+                onSelected: (emoji) => setState(() => _emoji = emoji),
+              ),
+              const SizedBox(height: 16),
+              Text('Color', style: textTheme.labelLarge),
+              const SizedBox(height: 8),
+              ColorSelector(
+                selected: _colorValue,
+                onSelected: (value) => setState(() => _colorValue = value),
+              ),
+              const SizedBox(height: 16),
+              Text('Background', style: textTheme.labelLarge),
+              const SizedBox(height: 8),
+              if (_backgroundImagePath != null) ...[
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.file(
+                    File(_backgroundImagePath!),
+                    height: 140,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, _, _) => const SizedBox(
+                      height: 140,
+                      child: Center(child: Icon(Icons.broken_image_outlined)),
+                    ),
                   ),
                 ),
-                if (_backgroundImagePath != null) ...[
-                  const SizedBox(width: 8),
-                  TextButton(
-                    onPressed: () =>
-                        setState(() => _backgroundImagePath = null),
-                    child: const Text('Remove'),
-                  ),
-                ],
+                const SizedBox(height: 8),
               ],
-            ),
-            const SizedBox(height: 32),
-            Text('Remind me', style: textTheme.titleMedium),
-            const SizedBox(height: 8),
-            ReminderSettings(
-              enabled: _notificationEnabled,
-              daysBefore: _notificationDaysBefore,
-              timeLabel: _formatTime(_notificationTime),
-              onEnabledChanged: _setNotificationEnabled,
-              onDaysBeforeChanged: (days) =>
-                  setState(() => _notificationDaysBefore = days),
-              onTimeTap: _pickNotificationTime,
-            ),
-            const SizedBox(height: 32),
-            FilledButton(
-              onPressed: _isSaving ? null : _submit,
-              child: Text(_isEditing ? 'SAVE' : 'CREATE'),
-            ),
-          ],
+              Row(
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: _pickBackgroundImage,
+                    icon: const Icon(Icons.image_outlined),
+                    label: Text(
+                      _backgroundImagePath == null
+                          ? 'Choose image'
+                          : 'Change image',
+                    ),
+                  ),
+                  if (_backgroundImagePath != null) ...[
+                    const SizedBox(width: 8),
+                    TextButton(
+                      onPressed: () =>
+                          setState(() => _backgroundImagePath = null),
+                      child: const Text('Remove'),
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 32),
+              Text('Remind me', style: textTheme.titleMedium),
+              const SizedBox(height: 8),
+              ReminderSettings(
+                enabled: _notificationEnabled,
+                daysBefore: _notificationDaysBefore,
+                timeLabel: _formatTime(_notificationTime),
+                onEnabledChanged: _setNotificationEnabled,
+                onDaysBeforeChanged: (days) =>
+                    setState(() => _notificationDaysBefore = days),
+                onTimeTap: _pickNotificationTime,
+              ),
+              const SizedBox(height: 32),
+              FilledButton(
+                onPressed: _isSaving ? null : _submit,
+                child: Text(_isEditing ? 'SAVE' : 'CREATE'),
+              ),
+            ],
+          ),
         ),
       ),
     );
