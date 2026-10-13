@@ -24,14 +24,19 @@ class _CountdownScreenState extends State<CountdownScreen> {
   void initState() {
     super.initState();
     _remaining = _calculateRemaining();
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+    if (!_isCompleted) {
+      _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+    }
   }
+
+  bool get _isCompleted => _remaining == Duration.zero;
 
   Duration _calculateRemaining() =>
       CountdownCalculator.remainingDuration(widget.event.targetDate);
 
   void _tick() {
     setState(() => _remaining = _calculateRemaining());
+    if (_isCompleted) _timer?.cancel();
   }
 
   /// Formats the part of [duration] below one day as
@@ -74,24 +79,36 @@ class _CountdownScreenState extends State<CountdownScreen> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
-              Text(
-                '$days',
-                style: textTheme.displayLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.primary,
+              if (_isCompleted)
+                Text(
+                  'COUNTDOWN COMPLETED',
+                  style: textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2,
+                    color: colorScheme.primary,
+                  ),
+                  textAlign: TextAlign.center,
+                )
+              else ...[
+                Text(
+                  '$days',
+                  style: textTheme.displayLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.primary,
+                  ),
                 ),
-              ),
-              Text(
-                days == 1 ? 'DAY' : 'DAYS',
-                style: textTheme.titleMedium?.copyWith(letterSpacing: 2),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                _formatTimeOfDay(_remaining),
-                style: textTheme.titleMedium?.copyWith(
-                  fontFeatures: const [FontFeature.tabularFigures()],
+                Text(
+                  days == 1 ? 'DAY' : 'DAYS',
+                  style: textTheme.titleMedium?.copyWith(letterSpacing: 2),
                 ),
-              ),
+                const SizedBox(height: 24),
+                Text(
+                  _formatTimeOfDay(_remaining),
+                  style: textTheme.titleMedium?.copyWith(
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ],
               const SizedBox(height: 32),
               Text(
                 DateFormatters.longDate(event.targetDate),
