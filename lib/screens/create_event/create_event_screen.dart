@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../../core/utils/event_validators.dart';
 import '../../models/countdown_event.dart';
 import '../../repositories/event_repository.dart';
+import '../../services/background_image_service.dart';
 import '../../widgets/color_selector.dart';
 import '../../widgets/emoji_selector.dart';
 
@@ -23,11 +26,13 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   final _titleController = TextEditingController();
   final _dateController = TextEditingController();
   final _timeController = TextEditingController();
+  final _backgroundImageService = BackgroundImageService();
 
   DateTime? _date;
   TimeOfDay _time = const TimeOfDay(hour: 12, minute: 0);
   String? _emoji;
   int? _colorValue;
+  String? _backgroundImagePath;
   bool _isSaving = false;
 
   bool get _isEditing => widget.event != null;
@@ -45,6 +50,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       _time = TimeOfDay.fromDateTime(target);
       _emoji = event.emoji;
       _colorValue = event.colorValue;
+      _backgroundImagePath = event.backgroundImagePath;
     }
     _timeController.text = _formatTime(_time);
   }
@@ -87,6 +93,13 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     });
   }
 
+  Future<void> _pickBackgroundImage() async {
+    final path = await _backgroundImageService.pickBackgroundImage();
+    if (path == null || !mounted) return;
+
+    setState(() => _backgroundImagePath = path);
+  }
+
   DateTime? get _targetDate {
     final date = _date;
     if (date == null) return null;
@@ -110,7 +123,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       createdAt: existing?.createdAt ?? DateTime.now(),
       emoji: _emoji,
       colorValue: _colorValue,
-      backgroundImagePath: existing?.backgroundImagePath,
+      backgroundImagePath: _backgroundImagePath,
       notificationEnabled: existing?.notificationEnabled ?? false,
       notificationDaysBefore: existing?.notificationDaysBefore,
     );
@@ -182,6 +195,46 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
             ColorSelector(
               selected: _colorValue,
               onSelected: (value) => setState(() => _colorValue = value),
+            ),
+            const SizedBox(height: 16),
+            Text('Background', style: textTheme.labelLarge),
+            const SizedBox(height: 8),
+            if (_backgroundImagePath != null) ...[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.file(
+                  File(_backgroundImagePath!),
+                  height: 140,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => const SizedBox(
+                    height: 140,
+                    child: Center(child: Icon(Icons.broken_image_outlined)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+            Row(
+              children: [
+                OutlinedButton.icon(
+                  onPressed: _pickBackgroundImage,
+                  icon: const Icon(Icons.image_outlined),
+                  label: Text(
+                    _backgroundImagePath == null
+                        ? 'Choose image'
+                        : 'Change image',
+                  ),
+                ),
+                if (_backgroundImagePath != null) ...[
+                  const SizedBox(width: 8),
+                  TextButton(
+                    onPressed: () =>
+                        setState(() => _backgroundImagePath = null),
+                    child: const Text('Remove'),
+                  ),
+                ],
+              ],
             ),
             const SizedBox(height: 32),
             FilledButton(
