@@ -68,6 +68,25 @@ class _CountdownScreenState extends State<CountdownScreen> {
   }
 
   Future<void> _deleteEvent() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete countdown?'),
+        content: Text('Are you sure you want to delete "${_event.title}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
     await widget.repository.deleteEvent(_event.id);
     if (!mounted) return;
 
