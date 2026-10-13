@@ -9,6 +9,8 @@ import android.view.View
 import android.widget.RemoteViews
 import es.antonborri.home_widget.HomeWidgetLaunchIntent
 import es.antonborri.home_widget.HomeWidgetProvider
+import org.json.JSONArray
+import org.json.JSONException
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -37,28 +39,28 @@ class CountdownWidgetProvider : HomeWidgetProvider() {
         }
     }
 
-    // Keys must match HomeWidgetService in lib/services/home_widget_service.dart.
+    // The key and fields must match HomeWidgetService in
+    // lib/services/home_widget_service.dart.
     private fun showNearestEvent(
         context: Context,
         views: RemoteViews,
         widgetData: SharedPreferences,
     ) {
-        val title = widgetData.getString("nearest_event_title", null)
-        val targetMillis =
-            widgetData.getString("nearest_event_target_millis", null)?.toLongOrNull()
-        // The saved event can complete while the app is closed, so it is only
-        // shown while its target time is still ahead.
-        if (title == null || targetMillis == null || targetMillis <= System.currentTimeMillis()) {
+        // Events are saved nearest first. Skipping the ones that completed
+        // while the app was closed moves the widget on to the next event.
+        val now = System.currentTimeMillis()
+        val event = upcomingEvents(widgetData).firstOrNull { it.targetMillis > now }
+        if (event == null) {
             showEmptyState(context, views)
             return
         }
-        val emoji = widgetData.getString("nearest_event_emoji", null) ?: DEFAULT_EMOJI
+        val emoji = event.emoji ?: DEFAULT_EMOJI
 
-        val targetDate = Instant.ofEpochMilli(targetMillis).atZone(ZoneId.systemDefault()).toLocalDate()
+        val targetDate = Instant.ofEpochMilli(event.targetMillis).atZone(ZoneId.systemDefault()).toLocalDate()
         // Calendar days, matching CountdownCalculator.remainingDays in the app.
         val days = ChronoUnit.DAYS.between(LocalDate.now(), targetDate)
 
-        views.setTextViewText(R.id.widget_title, "$emoji $title")
+        views.setTextViewText(R.id.widget_title, "$emoji ${event.title}")
         views.setViewVisibility(R.id.widget_days, View.VISIBLE)
         if (days <= 0) {
             views.setTextViewText(R.id.widget_days, "TODAY")
@@ -72,7 +74,7 @@ class CountdownWidgetProvider : HomeWidgetProvider() {
         views.setViewVisibility(R.id.widget_date, View.VISIBLE)
 
         // Tinting keeps the rounded background shape; it needs Android 12+.
-        val color = widgetData.getString("nearest_event_color", null)?.toLongOrNull()
+        val color = event.color
         if (color != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             views.setColorStateList(
                 R.id.widget_root,
@@ -81,6 +83,31 @@ class CountdownWidgetProvider : HomeWidgetProvider() {
             )
         }
     }
+
+    private fun upcomingEvents(widgetData: SharedPreferences): List<WidgetEvent> {
+        val json = widgetData.getString("upcoming_events", null) ?: return emptyList()
+        return try {
+            val array = JSONArray(json)
+            (0 until array.length()).map { index ->
+                val item = array.getJSONObject(index)
+                WidgetEvent(
+                    title = item.getString("title"),
+                    emoji = item.optString("emoji").takeUnless { item.isNull("emoji") },
+                    targetMillis = item.getLong("targetMillis"),
+                    color = if (item.isNull("color")) null else item.getLong("color"),
+                )
+            }
+        } catch (e: JSONException) {
+            emptyList()
+        }
+    }
+
+    private data class WidgetEvent(
+        val title: String,
+        val emoji: String?,
+        val targetMillis: Long,
+        val color: Long?,
+    )
 
     private fun showEmptyState(context: Context, views: RemoteViews) {
         views.setTextViewText(R.id.widget_title, context.getString(R.string.countdown_widget_empty))
