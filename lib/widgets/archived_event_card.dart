@@ -6,9 +6,10 @@ import '../models/countdown_event.dart';
 import 'countdown_event_card.dart';
 
 class ArchivedEventCard extends StatelessWidget {
-  const ArchivedEventCard({super.key, required this.event});
+  const ArchivedEventCard({super.key, required this.event, this.onDelete});
 
   final CountdownEvent event;
+  final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +51,12 @@ class ArchivedEventCard extends StatelessWidget {
                 ],
               ),
             ),
+            if (onDelete != null)
+              IconButton(
+                icon: const Icon(Icons.delete_outline),
+                tooltip: 'Delete',
+                onPressed: onDelete,
+              ),
           ],
         ),
       ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/countdown_event.dart';
 import '../../repositories/event_repository.dart';
 import '../../widgets/archived_event_card.dart';
+import '../../widgets/delete_confirmation_dialog.dart';
 
 class ArchiveScreen extends StatefulWidget {
   const ArchiveScreen({super.key, required this.repository});
@@ -33,6 +34,17 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
     });
   }
 
+  Future<void> _deleteEvent(CountdownEvent event) async {
+    final confirmed = await showDeleteConfirmationDialog(
+      context,
+      title: event.title,
+    );
+    if (!confirmed) return;
+
+    await widget.repository.deleteEvent(event.id);
+    await _loadEvents();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,7 +64,13 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
       padding: const EdgeInsets.all(16),
       itemCount: _events.length,
       separatorBuilder: (_, _) => const SizedBox(height: 12),
-      itemBuilder: (context, index) => ArchivedEventCard(event: _events[index]),
+      itemBuilder: (context, index) {
+        final event = _events[index];
+        return ArchivedEventCard(
+          event: event,
+          onDelete: () => _deleteEvent(event),
+        );
+      },
     );
   }
 }
