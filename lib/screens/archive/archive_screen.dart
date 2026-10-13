@@ -1,13 +1,91 @@
 import 'package:flutter/material.dart';
 
-class ArchiveScreen extends StatelessWidget {
-  const ArchiveScreen({super.key});
+import '../../models/countdown_event.dart';
+import '../../repositories/event_repository.dart';
+
+class ArchiveScreen extends StatefulWidget {
+  const ArchiveScreen({super.key, required this.repository});
+
+  final EventRepository repository;
+
+  @override
+  State<ArchiveScreen> createState() => _ArchiveScreenState();
+}
+
+class _ArchiveScreenState extends State<ArchiveScreen> {
+  List<CountdownEvent> _events = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEvents();
+  }
+
+  Future<void> _loadEvents() async {
+    final events = await widget.repository.getArchivedEvents();
+    if (!mounted) return;
+
+    setState(() {
+      _events = events;
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Past Events')),
-      body: const Center(child: Text('No past events')),
+      body: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_events.isEmpty) {
+      return const _EmptyArchiveState();
+    }
+    return ListView.builder(
+      itemCount: _events.length,
+      itemBuilder: (context, index) =>
+          ListTile(title: Text(_events[index].title)),
+    );
+  }
+}
+
+class _EmptyArchiveState extends StatelessWidget {
+  const _EmptyArchiveState();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.archive_outlined,
+              size: 64,
+              color: theme.colorScheme.primary,
+            ),
+            const SizedBox(height: 16),
+            Text('No past events', style: theme.textTheme.titleLarge),
+            const SizedBox(height: 8),
+            Text(
+              'Finished countdowns will appear here.',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
