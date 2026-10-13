@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/countdown_event.dart';
 import '../../repositories/event_repository.dart';
+import '../../widgets/archived_event_card.dart';
 
 class ArchiveScreen extends StatefulWidget {
   const ArchiveScreen({super.key, required this.repository});
@@ -47,10 +48,11 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
     if (_events.isEmpty) {
       return const _EmptyArchiveState();
     }
-    return ListView.builder(
+    return ListView.separated(
+      padding: const EdgeInsets.all(16),
       itemCount: _events.length,
-      itemBuilder: (context, index) =>
-          ListTile(title: Text(_events[index].title)),
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
+      itemBuilder: (context, index) => ArchivedEventCard(event: _events[index]),
     );
   }
 }

@@ -31,4 +31,32 @@ void main() {
       );
     });
   });
+
+  group('CountdownCalculator.timeAgoLabel', () {
+    String label(DateTime targetDate) =>
+        CountdownCalculator.timeAgoLabel(targetDate, now: now);
+
+    test('says today for an event earlier today', () {
+      expect(label(DateTime(2026, 10, 12, 9)), 'Today');
+    });
+
+    test('counts days within the first month', () {
+      expect(label(DateTime(2026, 10, 11)), '1 day ago');
+      expect(label(DateTime(2026, 9, 20)), '22 days ago');
+    });
+
+    test('counts whole months within the first year', () {
+      expect(label(DateTime(2026, 9, 12)), '1 month ago');
+      expect(label(DateTime(2026, 1, 1)), '9 months ago');
+    });
+
+    test('does not round up a month that is not complete yet', () {
+      expect(label(DateTime(2026, 9, 13)), '29 days ago');
+    });
+
+    test('counts whole years', () {
+      expect(label(DateTime(2025, 10, 1)), '1 year ago');
+      expect(label(DateTime(2023, 6, 1)), '3 years ago');
+    });
+  });
 }

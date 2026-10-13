@@ -25,4 +25,23 @@ abstract final class CountdownCalculator {
     if (days == 1) return '1 day remaining';
     return '$days days remaining';
   }
+
+  /// How long ago [targetDate] passed, e.g. `9 months ago` or `1 year ago`.
+  static String timeAgoLabel(DateTime targetDate, {DateTime? now}) {
+    final from = now ?? DateTime.now();
+
+    var months =
+        (from.year - targetDate.year) * 12 + from.month - targetDate.month;
+    if (from.day < targetDate.day) months--;
+
+    if (months >= 12) return _plural(months ~/ 12, 'year');
+    if (months >= 1) return _plural(months, 'month');
+
+    final days = -remainingDays(targetDate, now: from);
+    if (days <= 0) return 'Today';
+    return _plural(days, 'day');
+  }
+
+  static String _plural(int count, String unit) =>
+      count == 1 ? '1 $unit ago' : '$count ${unit}s ago';
 }
