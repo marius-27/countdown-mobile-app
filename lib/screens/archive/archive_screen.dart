@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/countdown_event.dart';
 import '../../repositories/event_repository.dart';
+import '../../services/home_widget_service.dart';
 import '../../services/notification_service.dart';
 import '../../widgets/archived_event_card.dart';
 import '../../widgets/delete_confirmation_dialog.dart';
@@ -44,6 +45,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
 
     await NotificationService.instance.cancelEventReminder(event.id);
     await widget.repository.deleteEvent(event.id);
+    await HomeWidgetService.update(await widget.repository.getEvents());
     await _loadEvents();
   }
 

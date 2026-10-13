@@ -6,6 +6,7 @@ import '../../core/utils/event_validators.dart';
 import '../../models/countdown_event.dart';
 import '../../repositories/event_repository.dart';
 import '../../services/background_image_service.dart';
+import '../../services/home_widget_service.dart';
 import '../../services/notification_service.dart';
 import '../../widgets/color_selector.dart';
 import '../../widgets/emoji_selector.dart';
@@ -179,6 +180,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     final notifications = NotificationService.instance;
     if (existing != null) await notifications.cancelEventReminder(event.id);
     await notifications.scheduleEventReminder(event);
+    await HomeWidgetService.update(await widget.repository.getEvents());
     if (!mounted) return;
 
     Navigator.pop(context, event);
