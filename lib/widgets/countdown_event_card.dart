@@ -15,13 +15,29 @@ class CountdownEventCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final colorValue = event.colorValue;
+    final customColor = colorValue == null ? null : Color(colorValue);
 
     return Card(
       clipBehavior: Clip.antiAlias,
+      // A light tint keeps the text readable for every palette color.
+      color: customColor == null
+          ? null
+          : Color.alphaBlend(
+              customColor.withValues(alpha: 0.12),
+              Theme.of(context).colorScheme.surfaceContainerLow,
+            ),
       child: InkWell(
         onTap: onTap,
-        child: Padding(
+        child: Container(
           padding: const EdgeInsets.all(16),
+          decoration: customColor == null
+              ? null
+              : BoxDecoration(
+                  border: Border(
+                    left: BorderSide(color: customColor, width: 6),
+                  ),
+                ),
           child: Row(
             children: [
               Text(
