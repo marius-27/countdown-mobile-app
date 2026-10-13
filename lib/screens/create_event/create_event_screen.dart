@@ -90,13 +90,19 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final now = DateTime.now();
-    final event = CountdownEvent(
-      id: now.microsecondsSinceEpoch.toString(),
-      title: _titleController.text.trim(),
-      targetDate: _targetDate!,
-      createdAt: now,
-    );
+    final title = _titleController.text.trim();
+    final targetDate = _targetDate!;
+    final existing = widget.event;
+
+    // Editing keeps the id, so the repository replaces the stored event.
+    final event =
+        existing?.copyWith(title: title, targetDate: targetDate) ??
+        CountdownEvent(
+          id: DateTime.now().microsecondsSinceEpoch.toString(),
+          title: title,
+          targetDate: targetDate,
+          createdAt: DateTime.now(),
+        );
 
     setState(() => _isSaving = true);
     await widget.repository.saveEvent(event);

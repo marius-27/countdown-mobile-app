@@ -18,12 +18,19 @@ class CountdownScreen extends StatefulWidget {
 }
 
 class _CountdownScreenState extends State<CountdownScreen> {
+  late CountdownEvent _event;
   late Duration _remaining;
   Timer? _timer;
 
   @override
   void initState() {
     super.initState();
+    _event = widget.event;
+    _startCountdown();
+  }
+
+  void _startCountdown() {
+    _timer?.cancel();
     _remaining = _calculateRemaining();
     if (!_isCompleted) {
       _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
@@ -33,15 +40,25 @@ class _CountdownScreenState extends State<CountdownScreen> {
   bool get _isCompleted => _remaining == Duration.zero;
 
   Duration _calculateRemaining() =>
-      CountdownCalculator.remainingDuration(widget.event.targetDate);
+      CountdownCalculator.remainingDuration(_event.targetDate);
 
   void _tick() {
     setState(() => _remaining = _calculateRemaining());
     if (_isCompleted) _timer?.cancel();
   }
 
-  void _openEdit() {
-    Navigator.pushNamed(context, AppRoutes.editEvent, arguments: widget.event);
+  Future<void> _openEdit() async {
+    final updated = await Navigator.pushNamed<CountdownEvent>(
+      context,
+      AppRoutes.editEvent,
+      arguments: _event,
+    );
+    if (updated == null || !mounted) return;
+
+    setState(() {
+      _event = updated;
+      _startCountdown();
+    });
   }
 
   @override
@@ -63,7 +80,7 @@ class _CountdownScreenState extends State<CountdownScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final event = widget.event;
+    final event = _event;
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
     final days = _remaining.inDays;
