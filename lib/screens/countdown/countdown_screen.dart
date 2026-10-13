@@ -8,6 +8,7 @@ import '../../core/utils/countdown_calculator.dart';
 import '../../core/utils/date_formatters.dart';
 import '../../models/countdown_event.dart';
 import '../../repositories/event_repository.dart';
+import '../../services/background_image_service.dart';
 import '../../services/home_widget_service.dart';
 import '../../services/notification_service.dart';
 import '../../widgets/countdown_event_card.dart';
@@ -80,7 +81,9 @@ class _CountdownScreenState extends State<CountdownScreen> {
 
     await NotificationService.instance.cancelEventReminder(_event.id);
     await widget.repository.deleteEvent(_event.id);
-    await HomeWidgetService.update(await widget.repository.getEvents());
+    final events = await widget.repository.getEvents();
+    await HomeWidgetService.update(events);
+    unawaited(BackgroundImageService.deleteUnusedImages(events));
     if (!mounted) return;
 
     Navigator.pop(context);

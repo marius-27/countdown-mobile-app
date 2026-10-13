@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -180,7 +181,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     final notifications = NotificationService.instance;
     if (existing != null) await notifications.cancelEventReminder(event.id);
     await notifications.scheduleEventReminder(event);
-    await HomeWidgetService.update(await widget.repository.getEvents());
+    final events = await widget.repository.getEvents();
+    await HomeWidgetService.update(events);
+    unawaited(BackgroundImageService.deleteUnusedImages(events));
     if (!mounted) return;
 
     Navigator.pop(context, event);

@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../models/countdown_event.dart';
+
 class BackgroundImageService {
   BackgroundImageService({ImagePicker? picker})
     : _picker = picker ?? ImagePicker();
@@ -34,4 +36,34 @@ class BackgroundImageService {
     final copy = await File(picked.path).copy('${folder.path}/$fileName');
     return copy.path;
   }
+
+  /// Deletes copied images that none of [events] uses any more: ones that
+  /// were replaced or removed, belonged to a deleted event, or were picked on
+  /// a form that was then left without saving.
+  ///
+  /// Nothing waits on the result, so callers run it with `unawaited`.
+  static Future<void> deleteUnusedImages(List<CountdownEvent> events) async {
+    try {
+      final documents = await getApplicationDocumentsDirectory();
+      final folder = Directory('${documents.path}/$_folderName');
+      if (!await folder.exists()) return;
+
+      // Compared by file name: on iOS the documents folder's absolute path
+      // can change after an app update.
+      final used = {
+        for (final event in events)
+          if (event.backgroundImagePath case final path?) _fileName(path),
+      };
+      await for (final entity in folder.list()) {
+        if (entity is File && !used.contains(_fileName(entity.path))) {
+          await entity.delete();
+        }
+      }
+    } on Exception {
+      // Cleanup is best effort; a file left behind only takes up space.
+    }
+  }
+
+  static String _fileName(String path) =>
+      path.substring(path.lastIndexOf('/') + 1);
 }
