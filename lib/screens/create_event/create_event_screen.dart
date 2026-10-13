@@ -31,6 +31,15 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   @override
   void initState() {
     super.initState();
+
+    final event = widget.event;
+    if (event != null) {
+      final target = event.targetDate;
+      _titleController.text = event.title;
+      _date = DateTime(target.year, target.month, target.day);
+      _dateController.text = _formatDate(target);
+      _time = TimeOfDay.fromDateTime(target);
+    }
     _timeController.text = _formatTime(_time);
   }
 
@@ -45,11 +54,13 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   Future<void> _pickDate() async {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
+    final initialDate = _date ?? today;
 
     final picked = await showDatePicker(
       context: context,
-      initialDate: _date ?? today,
-      firstDate: today,
+      initialDate: initialDate,
+      // An edited event can already be in the past.
+      firstDate: initialDate.isBefore(today) ? initialDate : today,
       lastDate: DateTime(now.year + 100),
     );
     if (picked == null) return;
