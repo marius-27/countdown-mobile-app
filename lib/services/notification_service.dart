@@ -80,6 +80,10 @@ class NotificationService {
     );
   }
 
+  /// Removes the event's pending reminder, if any.
+  Future<void> cancelEventReminder(String eventId) =>
+      _plugin.cancel(notificationId(eventId));
+
   /// When the reminder for [event] should fire, or null if it has none.
   static tz.TZDateTime? reminderDate(CountdownEvent event) {
     final daysBefore = event.notificationDaysBefore;

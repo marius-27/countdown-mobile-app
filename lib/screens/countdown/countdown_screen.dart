@@ -8,6 +8,7 @@ import '../../core/utils/countdown_calculator.dart';
 import '../../core/utils/date_formatters.dart';
 import '../../models/countdown_event.dart';
 import '../../repositories/event_repository.dart';
+import '../../services/notification_service.dart';
 import '../../widgets/countdown_event_card.dart';
 import '../../widgets/delete_confirmation_dialog.dart';
 
@@ -76,6 +77,7 @@ class _CountdownScreenState extends State<CountdownScreen> {
     );
     if (!confirmed || !mounted) return;
 
+    await NotificationService.instance.cancelEventReminder(_event.id);
     await widget.repository.deleteEvent(_event.id);
     if (!mounted) return;
 
