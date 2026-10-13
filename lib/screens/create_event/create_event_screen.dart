@@ -174,9 +174,11 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
     setState(() => _isSaving = true);
     await widget.repository.saveEvent(event);
-    if (existing == null) {
-      await NotificationService.instance.scheduleEventReminder(event);
-    }
+    // An edit can change the date or turn the reminder off, so the old
+    // reminder is dropped before scheduling the current one.
+    final notifications = NotificationService.instance;
+    if (existing != null) await notifications.cancelEventReminder(event.id);
+    await notifications.scheduleEventReminder(event);
     if (!mounted) return;
 
     Navigator.pop(context, event);
