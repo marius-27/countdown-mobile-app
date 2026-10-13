@@ -39,6 +39,12 @@ class _CountdownScreenState extends State<CountdownScreen> {
     if (_isCompleted) _timer?.cancel();
   }
 
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
   /// Formats the part of [duration] below one day as
   /// `03 HOURS : 42 MIN : 19 SEC`.
   static String _formatTimeOfDay(Duration duration) {
