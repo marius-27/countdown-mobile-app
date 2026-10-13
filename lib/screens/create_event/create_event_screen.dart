@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/utils/event_validators.dart';
 import '../../models/countdown_event.dart';
 import '../../repositories/event_repository.dart';
+import '../../widgets/emoji_selector.dart';
 
 class CreateEventScreen extends StatefulWidget {
   const CreateEventScreen({super.key, required this.repository, this.event});
@@ -24,6 +25,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
   DateTime? _date;
   TimeOfDay _time = const TimeOfDay(hour: 12, minute: 0);
+  String? _emoji;
   bool _isSaving = false;
 
   bool get _isEditing => widget.event != null;
@@ -39,6 +41,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       _date = DateTime(target.year, target.month, target.day);
       _dateController.text = _formatDate(target);
       _time = TimeOfDay.fromDateTime(target);
+      _emoji = event.emoji;
     }
     _timeController.text = _formatTime(_time);
   }
@@ -113,6 +116,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(_isEditing ? 'Edit Countdown' : 'New Countdown'),
@@ -153,6 +158,15 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
               ),
               readOnly: true,
               onTap: _pickTime,
+            ),
+            const SizedBox(height: 32),
+            Text('Customize event', style: textTheme.titleMedium),
+            const SizedBox(height: 16),
+            Text('Emoji', style: textTheme.labelLarge),
+            const SizedBox(height: 8),
+            EmojiSelector(
+              selected: _emoji,
+              onSelected: (emoji) => setState(() => _emoji = emoji),
             ),
             const SizedBox(height: 32),
             FilledButton(
