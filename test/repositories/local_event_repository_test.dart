@@ -64,6 +64,39 @@ void main() {
     expect(events.map((e) => e.id), ['2']);
   });
 
+  test('deleting an unknown id leaves the events unchanged', () async {
+    final repository = await createRepository();
+
+    await repository.saveEvent(_event('1'));
+    await repository.deleteEvent('missing');
+
+    final events = await repository.getEvents();
+    expect(events.map((e) => e.id), ['1']);
+  });
+
+  test('keeps customization and reminder settings', () async {
+    final repository = await createRepository();
+
+    await repository.saveEvent(
+      _event('1').copyWith(
+        emoji: '🎂',
+        colorValue: 0xFFE53935,
+        backgroundImagePath: '/backgrounds/1.jpg',
+        notificationEnabled: true,
+        notificationDaysBefore: 7,
+        notificationTimeMinutes: 9 * 60,
+      ),
+    );
+
+    final event = (await repository.getEvents()).single;
+    expect(event.emoji, '🎂');
+    expect(event.colorValue, 0xFFE53935);
+    expect(event.backgroundImagePath, '/backgrounds/1.jpg');
+    expect(event.notificationEnabled, isTrue);
+    expect(event.notificationDaysBefore, 7);
+    expect(event.notificationTimeMinutes, 9 * 60);
+  });
+
   test('events remain saved after the app restarts', () async {
     final repository = await createRepository();
     await repository.saveEvent(_event('1'));
@@ -92,5 +125,29 @@ void main() {
 
     final archived = await repository.getArchivedEvents(now: now);
     expect(archived.map((e) => e.id), ['new-year', 'exam']);
+  });
+
+  test('archives an event as soon as its target date is reached', () async {
+    final repository = await createRepository();
+    final now = DateTime(2026, 10, 13, 12);
+
+    await repository.saveEvent(_event('now', targetDate: now));
+    await repository.saveEvent(
+      _event('later', targetDate: now.add(const Duration(minutes: 1))),
+    );
+
+    final archived = await repository.getArchivedEvents(now: now);
+    expect(archived.map((e) => e.id), ['now']);
+  });
+
+  test('has no archived events when all events are upcoming', () async {
+    final repository = await createRepository();
+
+    await repository.saveEvent(_event('1'));
+
+    final archived = await repository.getArchivedEvents(
+      now: DateTime(2026, 10, 13),
+    );
+    expect(archived, isEmpty);
   });
 }
