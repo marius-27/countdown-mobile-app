@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../core/constants/app_routes.dart';
 import '../../core/utils/countdown_calculator.dart';
 import '../../core/utils/date_formatters.dart';
 import '../../models/countdown_event.dart';
@@ -39,6 +40,10 @@ class _CountdownScreenState extends State<CountdownScreen> {
     if (_isCompleted) _timer?.cancel();
   }
 
+  void _openEdit() {
+    Navigator.pushNamed(context, AppRoutes.editEvent, arguments: widget.event);
+  }
+
   @override
   void dispose() {
     _timer?.cancel();
@@ -64,7 +69,15 @@ class _CountdownScreenState extends State<CountdownScreen> {
     final days = _remaining.inDays;
 
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit_outlined),
+            tooltip: 'Edit',
+            onPressed: _openEdit,
+          ),
+        ],
+      ),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),

@@ -5,9 +5,12 @@ import '../../models/countdown_event.dart';
 import '../../repositories/event_repository.dart';
 
 class CreateEventScreen extends StatefulWidget {
-  const CreateEventScreen({super.key, required this.repository});
+  const CreateEventScreen({super.key, required this.repository, this.event});
 
   final EventRepository repository;
+
+  /// The event being edited, or null when creating a new one.
+  final CountdownEvent? event;
 
   @override
   State<CreateEventScreen> createState() => _CreateEventScreenState();
@@ -22,6 +25,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   DateTime? _date;
   TimeOfDay _time = const TimeOfDay(hour: 12, minute: 0);
   bool _isSaving = false;
+
+  bool get _isEditing => widget.event != null;
 
   @override
   void initState() {
@@ -92,7 +97,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('New Countdown')),
+      appBar: AppBar(
+        title: Text(_isEditing ? 'Edit Countdown' : 'New Countdown'),
+      ),
       body: Form(
         key: _formKey,
         child: ListView(
@@ -133,7 +140,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
             const SizedBox(height: 32),
             FilledButton(
               onPressed: _isSaving ? null : _submit,
-              child: const Text('CREATE'),
+              child: Text(_isEditing ? 'SAVE' : 'CREATE'),
             ),
           ],
         ),
