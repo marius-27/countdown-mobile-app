@@ -6,12 +6,18 @@ import '../../core/constants/app_routes.dart';
 import '../../core/utils/countdown_calculator.dart';
 import '../../core/utils/date_formatters.dart';
 import '../../models/countdown_event.dart';
+import '../../repositories/event_repository.dart';
 import '../../widgets/countdown_event_card.dart';
 
 class CountdownScreen extends StatefulWidget {
-  const CountdownScreen({super.key, required this.event});
+  const CountdownScreen({
+    super.key,
+    required this.event,
+    required this.repository,
+  });
 
   final CountdownEvent event;
+  final EventRepository repository;
 
   @override
   State<CountdownScreen> createState() => _CountdownScreenState();
@@ -61,6 +67,13 @@ class _CountdownScreenState extends State<CountdownScreen> {
     });
   }
 
+  Future<void> _deleteEvent() async {
+    await widget.repository.deleteEvent(_event.id);
+    if (!mounted) return;
+
+    Navigator.pop(context);
+  }
+
   @override
   void dispose() {
     _timer?.cancel();
@@ -92,6 +105,11 @@ class _CountdownScreenState extends State<CountdownScreen> {
             icon: const Icon(Icons.edit_outlined),
             tooltip: 'Edit',
             onPressed: _openEdit,
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            tooltip: 'Delete',
+            onPressed: _deleteEvent,
           ),
         ],
       ),

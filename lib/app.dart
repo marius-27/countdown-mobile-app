@@ -32,6 +32,7 @@ class CountdownApp extends StatelessWidget {
         ),
         AppRoutes.countdown: (context) => CountdownScreen(
           event: ModalRoute.of(context)!.settings.arguments as CountdownEvent,
+          repository: repository,
         ),
         AppRoutes.archive: (_) => const ArchiveScreen(),
       },
