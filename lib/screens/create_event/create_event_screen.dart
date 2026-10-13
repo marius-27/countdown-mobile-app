@@ -174,6 +174,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
     setState(() => _isSaving = true);
     await widget.repository.saveEvent(event);
+    if (existing == null) {
+      await NotificationService.instance.scheduleEventReminder(event);
+    }
     if (!mounted) return;
 
     Navigator.pop(context, event);

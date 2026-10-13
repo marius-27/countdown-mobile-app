@@ -4,6 +4,8 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
+import '../models/countdown_event.dart';
+
 class NotificationService {
   NotificationService._();
 
@@ -56,6 +58,62 @@ class NotificationService {
     await _plugin.initialize(settings);
     _initialized = true;
   }
+
+  /// Schedules the event's reminder, if it has one enabled and its time is
+  /// still in the future.
+  Future<void> scheduleEventReminder(CountdownEvent event) async {
+    final reminderAt = reminderDate(event);
+    final now = tz.TZDateTime.now(tz.local);
+    if (reminderAt == null || !reminderAt.isAfter(now)) return;
+
+    final emoji = event.emoji;
+    await _plugin.zonedSchedule(
+      notificationId(event.id),
+      emoji == null ? event.title : '$emoji ${event.title}',
+      _reminderBody(event.notificationDaysBefore!),
+      reminderAt,
+      details,
+      // Inexact alarms don't need the exact alarm permission and are still
+      // delivered within a few minutes of the chosen time.
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      payload: event.id,
+    );
+  }
+
+  /// When the reminder for [event] should fire, or null if it has none.
+  static tz.TZDateTime? reminderDate(CountdownEvent event) {
+    final daysBefore = event.notificationDaysBefore;
+    final minutes = event.notificationTimeMinutes;
+    if (!event.notificationEnabled || daysBefore == null || minutes == null) {
+      return null;
+    }
+
+    final target = event.targetDate;
+    return tz.TZDateTime(
+      tz.local,
+      target.year,
+      target.month,
+      target.day - daysBefore,
+      minutes ~/ 60,
+      minutes % 60,
+    );
+  }
+
+  /// A stable notification id for an event, so its reminder can later be
+  /// cancelled or replaced. Event ids are too large for the plugin's 32-bit
+  /// ids, and [String.hashCode] isn't guaranteed to stay the same between app
+  /// runs, so this uses a 31-bit FNV-1a hash.
+  static int notificationId(String eventId) {
+    var hash = 0x811c9dc5;
+    for (final unit in eventId.codeUnits) {
+      hash = ((hash ^ unit) * 0x01000193) & 0xffffffff;
+    }
+    return hash & 0x7fffffff;
+  }
+
+  static String _reminderBody(int daysBefore) => daysBefore == 1
+      ? 'Happening tomorrow!'
+      : 'Happening in $daysBefore days!';
 
   /// Asks the user to allow notifications. Returns whether they are allowed.
   ///
