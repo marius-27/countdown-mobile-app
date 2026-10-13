@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -54,5 +55,34 @@ class NotificationService {
     );
     await _plugin.initialize(settings);
     _initialized = true;
+  }
+
+  /// Asks the user to allow notifications. Returns whether they are allowed.
+  ///
+  /// Only Android 13+ and iOS show a prompt; older Android versions allow
+  /// notifications by default. Once the user has answered, the system returns
+  /// the saved answer without prompting again.
+  Future<bool> requestPermission() async {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        final android = _plugin
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >();
+        return await android?.requestNotificationsPermission() ?? false;
+      case TargetPlatform.iOS:
+        final ios = _plugin
+            .resolvePlatformSpecificImplementation<
+              IOSFlutterLocalNotificationsPlugin
+            >();
+        return await ios?.requestPermissions(
+              alert: true,
+              badge: true,
+              sound: true,
+            ) ??
+            false;
+      default:
+        return false;
+    }
   }
 }
