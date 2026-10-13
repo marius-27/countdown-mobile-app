@@ -34,6 +34,17 @@ class _CountdownScreenState extends State<CountdownScreen> {
     setState(() => _remaining = _calculateRemaining());
   }
 
+  /// Formats the part of [duration] below one day as
+  /// `03 HOURS : 42 MIN : 19 SEC`.
+  static String _formatTimeOfDay(Duration duration) {
+    String twoDigits(int value) => value.toString().padLeft(2, '0');
+
+    final hours = twoDigits(duration.inHours.remainder(24));
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return '$hours HOURS : $minutes MIN : $seconds SEC';
+  }
+
   @override
   Widget build(BuildContext context) {
     final event = widget.event;
@@ -73,6 +84,13 @@ class _CountdownScreenState extends State<CountdownScreen> {
               Text(
                 days == 1 ? 'DAY' : 'DAYS',
                 style: textTheme.titleMedium?.copyWith(letterSpacing: 2),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                _formatTimeOfDay(_remaining),
+                style: textTheme.titleMedium?.copyWith(
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
               ),
               const SizedBox(height: 32),
               Text(
