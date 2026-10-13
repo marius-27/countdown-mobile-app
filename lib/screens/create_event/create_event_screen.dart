@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/utils/event_validators.dart';
 import '../../models/countdown_event.dart';
 import '../../repositories/event_repository.dart';
+import '../../widgets/color_selector.dart';
 import '../../widgets/emoji_selector.dart';
 
 class CreateEventScreen extends StatefulWidget {
@@ -26,6 +27,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   DateTime? _date;
   TimeOfDay _time = const TimeOfDay(hour: 12, minute: 0);
   String? _emoji;
+  int? _colorValue;
   bool _isSaving = false;
 
   bool get _isEditing => widget.event != null;
@@ -42,6 +44,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       _dateController.text = _formatDate(target);
       _time = TimeOfDay.fromDateTime(target);
       _emoji = event.emoji;
+      _colorValue = event.colorValue;
     }
     _timeController.text = _formatTime(_time);
   }
@@ -167,6 +170,13 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
             EmojiSelector(
               selected: _emoji,
               onSelected: (emoji) => setState(() => _emoji = emoji),
+            ),
+            const SizedBox(height: 16),
+            Text('Color', style: textTheme.labelLarge),
+            const SizedBox(height: 8),
+            ColorSelector(
+              selected: _colorValue,
+              onSelected: (value) => setState(() => _colorValue = value),
             ),
             const SizedBox(height: 32),
             FilledButton(
