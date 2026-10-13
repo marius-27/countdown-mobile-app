@@ -4,11 +4,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:countdown_mobile_app/models/countdown_event.dart';
 import 'package:countdown_mobile_app/repositories/local_event_repository.dart';
 
-CountdownEvent _event(String id, {String title = 'Birthday'}) {
+CountdownEvent _event(
+  String id, {
+  String title = 'Birthday',
+  DateTime? targetDate,
+}) {
   return CountdownEvent(
     id: id,
     title: title,
-    targetDate: DateTime(2026, 12, 25, 12),
+    targetDate: targetDate ?? DateTime(2026, 12, 25, 12),
     createdAt: DateTime(2026, 10, 12),
   );
 }
@@ -70,5 +74,23 @@ void main() {
     final events = await restarted.getEvents();
     expect(events.single.id, '1');
     expect(events.single.targetDate, DateTime(2026, 12, 25, 12));
+  });
+
+  test('returns only completed events as archived, newest first', () async {
+    final repository = await createRepository();
+    final now = DateTime(2026, 10, 13, 12);
+
+    await repository.saveEvent(
+      _event('exam', targetDate: DateTime(2025, 10, 1)),
+    );
+    await repository.saveEvent(
+      _event('new-year', targetDate: DateTime(2026, 1, 1)),
+    );
+    await repository.saveEvent(
+      _event('birthday', targetDate: DateTime(2026, 12, 25)),
+    );
+
+    final archived = await repository.getArchivedEvents(now: now);
+    expect(archived.map((e) => e.id), ['new-year', 'exam']);
   });
 }

@@ -24,6 +24,14 @@ class LocalEventRepository implements EventRepository {
   }
 
   @override
+  Future<List<CountdownEvent>> getArchivedEvents({DateTime? now}) async {
+    final from = now ?? DateTime.now();
+    final events = await getEvents();
+    return events.where((e) => e.isCompleted(now: from)).toList()
+      ..sort((a, b) => b.targetDate.compareTo(a.targetDate));
+  }
+
+  @override
   Future<void> saveEvent(CountdownEvent event) async {
     final events = await getEvents();
     final index = events.indexWhere((e) => e.id == event.id);
