@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 
@@ -105,8 +106,91 @@ class _CountdownScreenState extends State<CountdownScreen> {
     final colorScheme = Theme.of(context).colorScheme;
     final days = _remaining.inDays;
 
+    final backgroundPath = event.backgroundImagePath;
+    // The file can be missing, e.g. after the app data was restored elsewhere.
+    final background =
+        backgroundPath != null && File(backgroundPath).existsSync()
+        ? File(backgroundPath)
+        : null;
+    final hasBackground = background != null;
+
+    // Over a photo the text is drawn white on a dark scrim to stay readable.
+    final foreground = hasBackground ? Colors.white : null;
+    final accent = hasBackground ? Colors.white : colorScheme.primary;
+    final secondary = hasBackground
+        ? Colors.white70
+        : colorScheme.onSurfaceVariant;
+
+    final content = Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              event.emoji ?? CountdownEventCard.defaultEmoji,
+              style: textTheme.displayMedium,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              event.title.toUpperCase(),
+              style: textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.5,
+                color: foreground,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            if (_isCompleted)
+              Text(
+                'COUNTDOWN COMPLETED',
+                style: textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 2,
+                  color: accent,
+                ),
+                textAlign: TextAlign.center,
+              )
+            else ...[
+              Text(
+                '$days',
+                style: textTheme.displayLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: accent,
+                ),
+              ),
+              Text(
+                days == 1 ? 'DAY' : 'DAYS',
+                style: textTheme.titleMedium?.copyWith(
+                  letterSpacing: 2,
+                  color: foreground,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                _formatTimeOfDay(_remaining),
+                style: textTheme.titleMedium?.copyWith(
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                  color: foreground,
+                ),
+              ),
+            ],
+            const SizedBox(height: 32),
+            Text(
+              DateFormatters.longDate(event.targetDate),
+              style: textTheme.bodyLarge?.copyWith(color: secondary),
+            ),
+          ],
+        ),
+      ),
+    );
+
     return Scaffold(
+      extendBodyBehindAppBar: hasBackground,
       appBar: AppBar(
+        backgroundColor: hasBackground ? Colors.transparent : null,
+        foregroundColor: foreground,
         actions: [
           IconButton(
             icon: const Icon(Icons.edit_outlined),
@@ -120,67 +204,16 @@ class _CountdownScreenState extends State<CountdownScreen> {
           ),
         ],
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                event.emoji ?? CountdownEventCard.defaultEmoji,
-                style: textTheme.displayMedium,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                event.title.toUpperCase(),
-                style: textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.5,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              if (_isCompleted)
-                Text(
-                  'COUNTDOWN COMPLETED',
-                  style: textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 2,
-                    color: colorScheme.primary,
-                  ),
-                  textAlign: TextAlign.center,
-                )
-              else ...[
-                Text(
-                  '$days',
-                  style: textTheme.displayLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.primary,
-                  ),
-                ),
-                Text(
-                  days == 1 ? 'DAY' : 'DAYS',
-                  style: textTheme.titleMedium?.copyWith(letterSpacing: 2),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  _formatTimeOfDay(_remaining),
-                  style: textTheme.titleMedium?.copyWith(
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
-                ),
+      body: background != null
+          ? Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.file(background, fit: BoxFit.cover),
+                const ColoredBox(color: Color(0x73000000)),
+                SafeArea(child: content),
               ],
-              const SizedBox(height: 32),
-              Text(
-                DateFormatters.longDate(event.targetDate),
-                style: textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+            )
+          : content,
     );
   }
 }
